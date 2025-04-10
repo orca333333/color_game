@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>색상 맞추기 게임</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 30px; }
+    #color-box { width: 50px; height: 80px; margin: 20px auto; border: 1px solid #000; display: inline-block; }
+    input { margin: 5px; }
+    .rgb-inputs { display: flex; justify-content: center; margin-top: 10px; }
+    .rgb-inputs input { margin: 5px; }
+    #result { margin-top: 10px; }
+    .button { padding: 10px 20px; margin-top: 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; }
+    .button:hover { background-color: #45a049; }
+  </style>
+</head>
+<body>
+  <h1>🎨 색상 맞추기 게임</h1>
+  <div id="color-box"></div>
+  <p>RGB 값을 입력해보세요! (0~255)</p>
+  <div class="rgb-inputs">
+    <input type="number" id="r" placeholder="R" min="0" max="255">
+    <input type="number" id="g" placeholder="G" min="0" max="255">
+    <input type="number" id="b" placeholder="B" min="0" max="255">
+  </div>
+  <button class="button" onclick="checkAnswer()">제출</button>
+  <p id="result"></p>
+  <button class="button" onclick="newQuestion()">다시하기</button>
+  <script>
+    let answerColor = { r: 0, g: 0, b: 0 };
+
+    function getRandomColor() {
+      const r = Math.floor(Math.random() * 256);
+      const g = Math.floor(Math.random() * 256);
+      const b = Math.floor(Math.random() * 256);
+      return { r, g, b };
+    }
+
+    function showColorBox(color) {
+      const box = document.getElementById("color-box");
+      box.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
+    }
+
+    function calculateSimilarity(userColor, correctColor) {
+      const diffR = Math.abs(userColor.r - correctColor.r);
+      const diffG = Math.abs(userColor.g - correctColor.g);
+      const diffB = Math.abs(userColor.b - correctColor.b);
+
+      // 유사도를 0~100%로 계산 (단계별 차이 계산)
+      const maxDiff = 255 * 3; // 최대 차이는 255의 3배 (RGB 총합)
+      const diff = diffR + diffG + diffB;
+      const similarity = Math.max(0, 100 - (diff / maxDiff) * 100);  // 비율로 유사도 계산
+      return similarity;
+    }
+
+    function newQuestion() {
+      answerColor = getRandomColor();
+      showColorBox(answerColor);
+      document.getElementById("result").textContent = "";
+      document.getElementById("r").value = "";
+      document.getElementById("g").value = "";
+      document.getElementById("b").value = "";
+    }
+
+    function checkAnswer() {
+      const userR = parseInt(document.getElementById("r").value);
+      const userG = parseInt(document.getElementById("g").value);
+      const userB = parseInt(document.getElementById("b").value);
+
+      if (
+        userR < 0 || userR > 255 ||
+        userG < 0 || userG > 255 ||
+        userB < 0 || userB > 255
+      ) {
+        document.getElementById("result").textContent = "RGB 값은 0~255 사이로 입력해야 합니다!";
+        return;
+      }
+
+      const userColor = { r: userR, g: userG, b: userB };
+      const similarity = calculateSimilarity(userColor, answerColor);
+
+      // 유사도 계산 후 결과 표시
+      document.getElementById("result").textContent = `유사도: ${similarity.toFixed(2)}% | 정답 RGB: (${answerColor.r}, ${answerColor.g}, ${answerColor.b})`;
+    }
+
+    newQuestion(); // 첫 문제 시작
+  </script>
+</body>
+</html>
